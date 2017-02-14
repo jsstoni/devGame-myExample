@@ -144,13 +144,21 @@
   Play.prototype = Object.create(DEVGAME.entity.Rect.prototype)
 
   Play.prototype.logic = function() {
+    // se guarda el valor del click
     this.click = _mouseClick
-    if (this.click === 1 && this.id == 1) {
-      state = 'play'
-      _mouseClick = 0
-    }
+    // se reinicia el flag
+    _mouseClick = 0
+
+    // se verifica si estamos teniendo colision con el mouse
     if (this.collisionCircle(mouse)){
-      this.sprite.use('hover')
+
+      // si nos han dado click, iniciamos el juego
+      if (this.click === 1 && this.id == 1) {
+        state = 'play'
+      }else{
+        this.sprite.use('hover')
+      }
+
     }else {
       this.sprite.use('ini')
     }
