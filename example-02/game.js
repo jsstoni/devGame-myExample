@@ -35,14 +35,10 @@
     stagePlay['inicio'] = menu
     stagePlay['play'] = play
 
-    /*stage = new DEVGAME.Container()
-    stage.setContext(context)*/
-
     sprite = new DEVGAME.Sprite({
       source:  'sprite.png', 
       swidth:  162,
       sheight: 54,
-      fps: 6,
       animation: 'ini',
       animations: {
         ini : [
@@ -58,7 +54,7 @@
           }
         ]
       }
-    });
+    })
 
     mouse = new DEVGAME.entity.Circle(mousex, mousey, 5)
     mouse.visible = false
@@ -136,8 +132,8 @@
 
   function Play(id, x, y, sx, sy) {
   	DEVGAME.entity.Rect.call(this, x, y, sx, sy)
-    this.setSprite(sprite)
-    this.id = id
+        this.setSprite(sprite)
+        this.id = id
   	this.select = false
   }
 
