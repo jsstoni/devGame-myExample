@@ -16,29 +16,61 @@
   var mousey = 0
   var _mouseClick = 0
 
-  var state = 'inicio'
-  var stage = null
+  var control   = null
+  var state     = 'inicio'
+  var stage     = null
   var stagePlay = []
-  var menu = null
-  var play = null
-  var mouse = null
-  var sprite = null
+  var menu      = null
+  var play      = null
+  var mouse     = null
+  var sprite    = null
   var personaje = null
 
   function init(){
-    menu = new DEVGAME.Container()
-    menu.setContext(context)
+    // Controlara todo el juego
+    control = new DEVGAME.Container()
+    control.setContext(context)
 
+    // Nuestro control puede llevar toda la 
+    // logica de los fps
+    control.logic = function(){
+      
+      var timestamp = this.timestamp
+
+      timeElapse = timeElapse === 0 ? timestamp : timeElapse
+      
+      deltaTime  = timestamp - timeElapse
+      timeElapse = timestamp
+
+      _seg += deltaTime
+
+      //debug refresh
+      if (_seg >= debugRefresh){
+        _fps = (1/deltaTime)*1000
+        _seg = 0
+      }
+      
+      if (deltaTime > 17){
+        deltaTime = 0
+      }
+    }
+
+    menu = new DEVGAME.Container()
     play = new DEVGAME.Container()
-    play.setContext(context)
+
+    control.add(menu, play)
 
     stagePlay['inicio'] = menu
-    stagePlay['play'] = play
+    stagePlay['play']   = play
 
     sprite = new DEVGAME.Sprite({
       source:  'sprite.png', 
       swidth:  162,
       sheight: 54,
+      // Aqui tengo un bug, el fps no deberia ser necesario
+      // ya que tu no estas creando una animacion como tal,
+      // debo revisarlo.
+      fps:     60,
       animation: 'ini',
       animations: {
         ini : [
@@ -62,18 +94,6 @@
     mouse.logic = function(){
       this.x = mousex
       this.y = mousey
-      if (this.getX() < 0){
-        this.x = 0
-      }
-      if (this.getX() > canvas.clientWidth){
-        this.x = canvas.clientWidth
-      }
-      if (this.getY() < 0){
-        this.y = 0
-      }
-      if (this.getY() > canvas.clientHeight){
-        this.y = canvas.clientHeight
-      }
     }
 
     personaje = new DEVGAME.entity.Circle(200, 200, 15)
@@ -85,39 +105,38 @@
       run(loop)
     })
 
-    menu.add(mouse, new Play(1, 15, 40, 120, 40))
-    play.add(mouse, personaje)
+    // Como necesitas el mouse en todo el juego 
+    // lo agregamos al objeto control
+    control.add(mouse)
+    menu.add(new Play(1, 15, 80, 120, 40))
+    play.add(personaje)
   }
 
   function exec(timestamp){
-    timeElapse = timeElapse === 0 ? timestamp : timeElapse
-    
-    deltaTime  = timestamp - timeElapse
-    timeElapse = timestamp
-
-    _seg += deltaTime
-
-    //debug refresh
-    if (_seg >= debugRefresh){
-      
-      _fps = (1/deltaTime)*1000
-      _seg = 0
-    }
-    
-    if (deltaTime > 17){
-      deltaTime = 0
-    }
-
+    control.timestamp = timestamp
+    control.exec()
     stagePlay[state].exec()
   }
 
   function draw(){
+    
+    // Prueba que pasa si eliminas esta linea
+    // y preguntate porque pasa esto.
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
+    
+    // Esta parte ya la debes tener clara
     stagePlay[state].render()
+    gui()
+
+  }
+
+  // Si no sabes que es el gui, investiga un poco
+  // o preguntame
+  function gui() {
     context.fillStyle = '#000'
     context.font      = 'normal 10pt Arial'
     context.fillText('hecho por: jsstoni', 20, 20)
-    context.fillText('DevGame', 20, 40)
+    context.fillText('DevGame',  20, 40)
   }
 
   function events(){
