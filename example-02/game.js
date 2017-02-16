@@ -67,10 +67,6 @@
       source:  'sprite.png', 
       swidth:  162,
       sheight: 54,
-      // Aqui tengo un bug, el fps no deberia ser necesario
-      // ya que tu no estas creando una animacion como tal,
-      // debo revisarlo.
-      fps:     60,
       animation: 'ini',
       animations: {
         ini : [
