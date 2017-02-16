@@ -54,7 +54,6 @@
       source:  'sprite.png', 
       swidth:  162,
       sheight: 54,
-      fps:     60,
       animation: 'ini',
       animations: {
         ini : [
