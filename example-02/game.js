@@ -151,8 +151,8 @@
 
   function Play(id, x, y, sx, sy) {
   	DEVGAME.entity.Rect.call(this, x, y, sx, sy)
-        this.setSprite(sprite)
-        this.id = id
+    this.setSprite(sprite)
+    this.id = id
   	this.select = false
   }
 
@@ -166,14 +166,12 @@
 
     // se verifica si estamos teniendo colision con el mouse
     if (this.collisionCircle(mouse)){
-
       // si nos han dado click, iniciamos el juego
       if (this.click === 1 && this.id == 1) {
         state = 'play'
       }else{
         this.sprite.use('hover')
       }
-
     }else {
       this.sprite.use('ini')
     }
@@ -182,9 +180,7 @@
   function loop(timestamp){
     exec(timestamp)
     draw()
-
     run(loop)
-
   }
 
   var run = DEVGAME.requestAnimationFrame(loop)

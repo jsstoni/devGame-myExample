@@ -15,21 +15,46 @@
   var mousex = 0
   var mousey = 0
 
-  var stage = null
-  var buttonPlay = null
+  var game = null
+  var state = 'inicio'
+  var stage = []
+  var menu = null
   var mouse = null
   var sprite = null
 
   function init(){
-    stage = new DEVGAME.Container()
-    buttonPlay = new DEVGAME.entity.Rect(15, 40, 120, 40)
-    stage.setContext(context)
+    game = new DEVGAME.Container()
+    game.setContext(context)
+    game.logic = function() {
+      var timestamp = this.timestamp
+
+      timeElapse = timeElapse === 0 ? timestamp : timeElapse
+      
+      deltaTime  = timestamp - timeElapse
+      timeElapse = timestamp
+
+      _seg += deltaTime
+
+      //debug refresh
+      if (_seg >= debugRefresh){
+        _fps = (1/deltaTime)*1000
+        _seg = 0
+      }
+      
+      if (deltaTime > 17){
+        deltaTime = 0
+      }
+    }
+
+    menu = new DEVGAME.Container()
+    game.add(menu)
+    stage['inicio'] = menu
 
     sprite = new DEVGAME.Sprite({
       source:  'sprite.png', 
       swidth:  162,
       sheight: 54,
-      fps: 6,
+      fps:     60,
       animation: 'ini',
       animations: {
         ini : [
@@ -45,7 +70,7 @@
           }
         ]
       }
-    });
+    })
 
     mouse = new DEVGAME.entity.Circle(mousex, mousey, 5)
     mouse.visible = false
@@ -53,26 +78,6 @@
     mouse.logic = function(){
       this.x = mousex
       this.y = mousey
-      if (this.getX() < 0){
-        this.x = 0
-      }
-      if (this.getX() > canvas.clientWidth){
-        this.x = canvas.clientWidth
-      }
-      if (this.getY() < 0){
-        this.y = 0
-      }
-      if (this.getY() > canvas.clientHeight){
-        this.y = canvas.clientHeight
-      }
-    }
-
-    buttonPlay.logic = function() {
-      if (this.collisionCircle(mouse)){
-        this.sprite.use('hover')
-      }else {
-        this.sprite.use('ini')
-      }
     }
 
     sprite.load(function(error){
@@ -80,40 +85,27 @@
       run(loop)
     })
 
-    buttonPlay.setSprite(sprite)
-
-    stage.add(mouse, buttonPlay)
+    game.add(mouse)
+    menu.add(new Play(1, 15, 80, 120, 40))
   }
 
-  function exec(timestamp){
-    timeElapse = timeElapse === 0 ? timestamp : timeElapse
-    
-    deltaTime  = timestamp - timeElapse
-    timeElapse = timestamp
-
-    _seg += deltaTime
-
-    //debug refresh
-    if (_seg >= debugRefresh){
-      
-      _fps = (1/deltaTime)*1000
-      _seg = 0
-    }
-    
-    if (deltaTime > 17){
-      deltaTime = 0
-    }
-
-    stage.exec()
+  function exec(timestamp) {
+    game.timestamp = timestamp
+    game.exec()
+    stage[state].exec()
   }
 
   function draw(){
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
-    stage.render()
+    stage[state].render()
+    gui()
+  }
+
+  function gui() {
     context.fillStyle = '#000'
     context.font      = 'normal 10pt Arial'
     context.fillText('hecho por: jsstoni', 20, 20)
-    context.fillText('DevGame', 20, 40)
+    context.fillText('DevGame',  20, 40)
   }
 
   function events(){
@@ -123,12 +115,27 @@
     }, false)
   }
 
+  function Play(id, x, y, sx, sy) {
+    DEVGAME.entity.Rect.call(this, x, y, sx, sy)
+    this.setSprite(sprite)
+    this.id = id
+    this.select = false
+  }
+
+  Play.prototype = Object.create(DEVGAME.entity.Rect.prototype)
+
+  Play.prototype.logic = function() {
+    if (this.collisionCircle(mouse)) {
+      this.sprite.use('hover')
+    }else {
+      this.sprite.use('ini')
+    }
+  }
+
   function loop(timestamp){
     exec(timestamp)
     draw()
-
     run(loop)
-
   }
 
   var run = DEVGAME.requestAnimationFrame(loop)
